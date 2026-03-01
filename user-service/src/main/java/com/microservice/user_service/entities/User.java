@@ -24,8 +24,5 @@ public class User {
     private String userEmail;
     @Column(nullable = true)
     private String userInfo;
-    public User orElseThrow(Object object) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
-    }
+   
 }
