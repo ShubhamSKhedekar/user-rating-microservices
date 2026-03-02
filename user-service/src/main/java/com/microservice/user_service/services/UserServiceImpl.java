@@ -18,16 +18,18 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User getUserById(String id) {
-        return userRepository.findById(id).orElseThrow(()-> new NoSuchElementException("User not present."));
+        return userRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("User not present."));
     }
 
     @Override
     public User getUserByEmail(String userEmail) {
-        return userRepository.findByUserEmail(userEmail).orElseThrow(()-> new NoSuchElementException("User not present."));
+        return userRepository.findByUserEmail(userEmail).orElseThrow(()-> new ResourceNotFoundException("User not present."));
     }
 
     @Override
     public User saveUser(User user) {
+        String randonUserId = java.util.UUID.randomUUID().toString();
+        user.setUserId(randonUserId);
         return userRepository.save(user);
     }
 

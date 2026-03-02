@@ -1,5 +1,7 @@
 package main.java.com.microservice.user_service.controllers;
 
+import com.microservice.user_service.entities.User;
+
 @RestController
 @RequestMapping("/user-service")
 public class UserServiceController {
@@ -8,27 +10,28 @@ public class UserServiceController {
     private UserService userService;
 
     @GetMapping("/user/{id}")
-    public User fetchUserById(@PathVariable String id) {
-        return userService.getUserById(id);
+    public ResponseEntity<User> fetchUserById(@PathVariable String id) {
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 
     @GetMapping("/user/email/{email}")
-    public User fetchUserByEmail(@PathVariable String email) {
-        return userService.getUserByEmail(email);   
+    public ResponseEntity<User> fetchUserByEmail(@PathVariable String email) {
+        return new ResponseEntity<>(userService.getUserByEmail(email), HttpStatus.OK);
     }
 
     @PostMapping("/user/save")
-    public User saveUser(@RequestBody User user) {
-        return userService.saveUser(user);  
+    public ResponseEntity<User> saveUser(@RequestBody User user) {
+        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);  
     }
 
     @PutMapping("/user/update")
-    public User updateUser(@RequestBody User user) {
-        return userService.updateUser(user);
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
+        return new ResponseEntity<>(userService.updateUser(user), HttpStatus.OK);
     }
 
     @DeleteMapping("/user/delete/{id}")
-    public void deleteUserById(@PathVariable String id) {
+    public ResponseEntity<Void> deleteUserById(@PathVariable String id) {
         userService.deleteUserById(id); 
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
