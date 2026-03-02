@@ -1,6 +1,7 @@
-package main.java.com.microservice.user_service.exceptions;
+package com.microservice.user_service.exceptions;
 
-public class ResourceNotFoundException extends Exception {
+
+public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {
         super(message);
     }

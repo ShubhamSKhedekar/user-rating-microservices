@@ -1,10 +1,12 @@
 package com.microservice.user_service.services;
+
 import com.microservice.user_service.entities.User;
 import com.microservice.user_service.repositories.IUserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.microservice.user_service.exceptions.ResourceNotFoundException;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -18,12 +20,18 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public User getUserById(String id) {
-        return userRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("User not present."));
+        return userRepository.findById(id).orElseThrow(()-> {
+            System.out.println("Exception occurred: ResourceNotFoundException");
+            return new ResourceNotFoundException("User not present.");
+        });
     }
 
     @Override
-    public User getUserByEmail(String userEmail) {
-        return userRepository.findByUserEmail(userEmail).orElseThrow(()-> new ResourceNotFoundException("User not present."));
+    public User getUserByEmail(String userEmail){
+        return userRepository.findByUserEmail(userEmail).orElseThrow(()-> {
+            System.out.println("Exception occurred: ResourceNotFoundException");
+            return new ResourceNotFoundException("User not present.");
+        });
     }
 
     @Override

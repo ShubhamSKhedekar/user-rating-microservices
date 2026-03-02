@@ -1,4 +1,6 @@
-package main.java.com.microservice.user_service.payload;
+package com.microservice.user_service.payload;
+import lombok.*;
+import org.springframework.http.HttpStatus; 
 
 @Getter
 @Setter
