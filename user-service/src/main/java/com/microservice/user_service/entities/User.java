@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import java.util.UUID;
 
 @Table
 @Entity
@@ -20,13 +21,19 @@ import lombok.ToString;
 public class User {
 
     @Id
-    @Column(unique = true, nullable = false)
+    @Column(name = "user_id")
     private String userId;
-    @Column(length = 100)
+    @Column(name = "user_name", length = 100)
     private String userName;
-    @Column(unique = false, nullable = false)
+    @Column(name = "user_email", unique = false, nullable = false)
     private String userEmail;
-    @Column(nullable = true)
+    @Column(name = "user_info", nullable = true)
     private String userInfo;
+
+    public User(String userName, String userEmail, String userInfo) {
+        this.userName = userName;
+        this.userEmail = userEmail;
+        this.userInfo = userInfo;
+    }
    
 }

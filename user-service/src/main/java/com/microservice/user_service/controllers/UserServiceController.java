@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.microservice.user_service.exceptions.ResourceNotFoundException;
+import java.util.List;
 
 
 @RestController
@@ -60,12 +61,27 @@ public class UserServiceController {
 
     @PutMapping("/user/update")
     public ResponseEntity<User> updateUser(@RequestBody User user) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(user));
+        User existingUser = userService.getUserById(user.getUserId());
+        if (existingUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", "NA", "1234567890"));
+        }else{
+            existingUser.setUserName(user.getUserName());
+            existingUser.setUserEmail(user.getUserEmail());
+            existingUser.setUserInfo(user.getUserInfo());
+            User updatedUser = userService.updateUser(existingUser);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+        }
+        
     }
 
     @DeleteMapping("/user/delete/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable String id) {
         userService.deleteUserById(id); 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/user/fetch-all")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 }
