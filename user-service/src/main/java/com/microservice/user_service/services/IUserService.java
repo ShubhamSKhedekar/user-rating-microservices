@@ -2,7 +2,6 @@ package com.microservice.user_service.services;
 
 import java.util.List;
 import com.microservice.user_service.entities.User;
-import com.microservice.user_service.exceptions.ResourceNotFoundException;
 
 
 public interface IUserService {

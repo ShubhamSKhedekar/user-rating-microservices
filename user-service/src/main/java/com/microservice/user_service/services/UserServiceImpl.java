@@ -3,7 +3,6 @@ package com.microservice.user_service.services;
 import com.microservice.user_service.entities.User;
 import com.microservice.user_service.repositories.IUserRepository;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.microservice.user_service.exceptions.ResourceNotFoundException;

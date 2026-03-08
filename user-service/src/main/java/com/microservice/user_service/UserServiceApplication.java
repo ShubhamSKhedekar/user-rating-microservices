@@ -37,6 +37,8 @@ public class UserServiceApplication {
 
 		// # Restart
 		// mvn spring-boot:run
+
+		//cat target/surefire-reports/*.txt
 	}
 
 }
