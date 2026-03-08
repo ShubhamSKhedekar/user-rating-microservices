@@ -1,0 +1,14 @@
+package com.microservice.rating_service.services;
+
+import java.util.Optional;
+import com.microservice.rating_service.entities.Rating;
+
+public interface IRatingService {
+
+    public Optional<Rating> getRatingById(String ratingId);
+    public Optional<Rating> getRatingByUserId(String userId);
+    public Optional<Rating> getRatingByHotelId(String hotelId);
+    public Optional<Rating> getRatingByUserIdAndHotelId(String userId, String hotelId);
+    public Rating saveRating(Rating rating);
+    public Rating deleteRatingById(String ratingId);
+}

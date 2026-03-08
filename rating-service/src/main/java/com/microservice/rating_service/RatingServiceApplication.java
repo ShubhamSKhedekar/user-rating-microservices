@@ -10,6 +10,7 @@ public class RatingServiceApplication {
 		SpringApplication.run(RatingServiceApplication.class, args);
 
 		//docker run -d -p 27017:27017 --name mongodb mongo
+		//docker start mongodb
 		//docker ps
 
 		//yml
