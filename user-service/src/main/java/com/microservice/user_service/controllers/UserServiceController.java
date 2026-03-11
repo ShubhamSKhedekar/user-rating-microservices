@@ -30,12 +30,12 @@ public class UserServiceController {
             User user = userService.getUserById(id);
             return ResponseEntity.status(HttpStatus.OK).body(user);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", "NA", "1234567890"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", "NA", "1234567890", null));
         }
         catch (Exception ex) {
             System.out.println("inside catch block of fetchUserById method");
             System.out.println("Exception occurred: " + ex.getClass().getName());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new User("NA", "Internal server error occurred.", "NA", "1234567890"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new User("NA", "Internal server error occurred.", "NA", "1234567890", null));
         }
     }
 
@@ -45,12 +45,12 @@ public class UserServiceController {
             User user = userService.getUserByEmail(email);
             return ResponseEntity.status(HttpStatus.OK).body(user);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", email, "1234567890"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", email, "1234567890", null));
         }
         catch (Exception ex) {
             System.out.println("inside catch block of fetchUserByEmail method");
             System.out.println("Exception occurred: " + ex.getClass().getName());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new User("NA", "Internal server error occurred.", email, "1234567890"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new User("NA", "Internal server error occurred.", email, "1234567890", null));
         }
     }
 
@@ -63,7 +63,7 @@ public class UserServiceController {
     public ResponseEntity<User> updateUser(@RequestBody User user) {
         User existingUser = userService.getUserById(user.getUserId());
         if (existingUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", "NA", "1234567890"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", "NA", "1234567890", null));
         }else{
             existingUser.setUserName(user.getUserName());
             existingUser.setUserEmail(user.getUserEmail());

@@ -23,25 +23,25 @@ public class RatingServiceController {
     @Autowired
     private IRatingService ratingService;
 
-    @GetMapping("/rating/id/{ratingId}")
+    @GetMapping("/get/id/{ratingId}")
     public ResponseEntity<Rating> fetchRatingById(@PathVariable String ratingId) {
         Optional<Rating> rating = ratingService.getRatingById(ratingId);
         return ResponseEntity.status(HttpStatus.OK).body(rating.get());
     }
 
-    @GetMapping("/rating/user/{userId}")
+    @GetMapping("/get/user/{userId}")
     public ResponseEntity<Rating> fetchRatingByUserId(@PathVariable String userId) {
         Optional<Rating> rating = ratingService.getRatingByUserId(userId);
         return ResponseEntity.status(HttpStatus.OK).body(rating.get());     
     }
 
-    @GetMapping("/rating/hotel/{hotelId}")
+    @GetMapping("/get/hotel/{hotelId}")
     public ResponseEntity<Rating> fetchRatingByHotelId(@PathVariable String hotelId) {
         Optional<Rating> rating = ratingService.getRatingByHotelId(hotelId);    
         return ResponseEntity.status(HttpStatus.OK).body(rating.get());
     }
 
-    @GetMapping("/rating/user/{userId}/hotel/{hotelId}")
+    @GetMapping("/get/user/{userId}/hotel/{hotelId}")
     public ResponseEntity<Rating> fetchRatingByUserIdAndHotelId(@PathVariable String userId, @PathVariable String hotelId) {
         Optional<Rating> rating = ratingService .getRatingByUserIdAndHotelId(userId, hotelId);
         return ResponseEntity.status(HttpStatus.OK).body(rating.get()); 

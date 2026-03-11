@@ -18,12 +18,12 @@ import lombok.Setter;
 public class Hotel {
 
     @Id
-    @Column(name = "hotel_id", unique = true, nullable = false)
+    @Column(name = "hotelId", unique = true, nullable = false)
     String hotelId;
-    @Column(name = "hotel_name", nullable = false)
+    @Column(name = "hotelName", nullable = false)
     String hotelName;
-    @Column(name = "hotel_location", nullable = false)
+    @Column(name = "hotelLocation", nullable = false)
     String hotelLocation;   
-    @Column(name = "hotel_about")
+    @Column(name = "hotelAbout")
     String hotelAbout;
 }

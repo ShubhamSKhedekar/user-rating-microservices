@@ -1,9 +1,13 @@
 package com.microservice.user_service.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,14 +24,17 @@ import lombok.ToString;
 public class User {
 
     @Id
-    @Column(name = "user_id")
+    @Column(name = "userId")
     private String userId;
-    @Column(name = "user_name", length = 100)
+    @Column(name = "userName", length = 100)
     private String userName;
-    @Column(name = "user_email", unique = false, nullable = false)
+    @Column(name = "userEmail", unique = false, nullable = false)
     private String userEmail;
-    @Column(name = "user_info", nullable = true)
+    @Column(name = "userInfo", nullable = true)
     private String userInfo;
+
+    @Transient
+    private List<Rating> ratings = new ArrayList<>();   
 
     public User(String userName, String userEmail, String userInfo) {
         this.userName = userName;
