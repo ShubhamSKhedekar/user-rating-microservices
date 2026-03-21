@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
-class HotelServiceApplicationTests {
+class RatingServiceApplicationTests {
 
     @Test
     void contextLoads() {

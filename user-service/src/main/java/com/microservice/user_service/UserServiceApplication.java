@@ -26,11 +26,10 @@ public class UserServiceApplication {
 		// Password: password
 
 		// Create DB & user:
-		// CREATE DATABASE user_service;
+		// CREATE DATABASE userservice_db;
 		// CREATE USER 'userservice'@'localhost' IDENTIFIED BY 'password';
-		// GRANT ALL PRIVILEGES ON user_service.* TO 'userservice'@'localhost';
+		// GRANT ALL PRIVILEGES ON userservice_db.* TO 'userservice'@'localhost';
 		// FLUSH PRIVILEGES;
-
 
 		// # Stop app
 		// CTRL + C

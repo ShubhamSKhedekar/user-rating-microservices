@@ -39,7 +39,6 @@ public class HotelServiceApplication {
 		// \dt   → list tables
 		// \q    → quit
 
-
 		//-----------------------------------------
 		//1️⃣ Open PostgreSQL authentication config
 		// Run:

@@ -5,14 +5,19 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.microservice.rating_service.entities.Rating;
-import com.microservice.rating_service.repositories.RatingRepository;
+//import com.microservice.rating_service.repositories.IRatingRepositoryMongoDb;
+import com.microservice.rating_service.repositories.IRatingRepositoryMySql;
 
 @Service
 public class RatingServiceImpl implements IRatingService {
 
-    @Autowired
-    private RatingRepository ratingRepository;
+    // @Autowired
+    // private IRatingRepositoryMongoDb ratingRepository;
 
+    @Autowired
+    private IRatingRepositoryMySql ratingRepository;
+
+    @Override
     public Optional<Rating> getRatingById(String ratingId) {
         return ratingRepository.findById(ratingId);
     }
