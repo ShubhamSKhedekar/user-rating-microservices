@@ -1,5 +1,6 @@
 package com.microservice.rating_service.controllers;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +31,15 @@ public class RatingServiceController {
     }
 
     @GetMapping("/get/user/{userId}")
-    public ResponseEntity<Rating> fetchRatingByUserId(@PathVariable String userId) {
-        Optional<Rating> rating = ratingService.getRatingByUserId(userId);
-        return ResponseEntity.status(HttpStatus.OK).body(rating.get());     
+    public ResponseEntity<List<Rating>> fetchRatingByUserId(@PathVariable String userId) {
+        List<Rating> rating = ratingService.getRatingByUserId(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(rating);     
     }
 
     @GetMapping("/get/hotel/{hotelId}")
-    public ResponseEntity<Rating> fetchRatingByHotelId(@PathVariable String hotelId) {
-        Optional<Rating> rating = ratingService.getRatingByHotelId(hotelId);    
-        return ResponseEntity.status(HttpStatus.OK).body(rating.get());
+    public ResponseEntity<List<Rating>> fetchRatingByHotelId(@PathVariable String hotelId) {
+        List<Rating> rating = ratingService.getRatingByHotelId(hotelId);    
+        return ResponseEntity.status(HttpStatus.OK).body(rating);
     }
 
     @GetMapping("/get/user/{userId}/hotel/{hotelId}")
@@ -60,6 +61,11 @@ public class RatingServiceController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(rating);
         }
         return ResponseEntity.status(HttpStatus.OK).body(rating);
+    }
+
+    @GetMapping("/get/all")
+    public ResponseEntity<List<Rating>> fetchAllRatings() {
+        return ResponseEntity.status(HttpStatus.OK).body(ratingService.getAllRatings());
     }
     
 }

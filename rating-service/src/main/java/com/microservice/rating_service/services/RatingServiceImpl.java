@@ -1,5 +1,6 @@
 package com.microservice.rating_service.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.microservice.rating_service.entities.Rating;
 //import com.microservice.rating_service.repositories.IRatingRepositoryMongoDb;
 import com.microservice.rating_service.repositories.IRatingRepositoryMySql;
+import java.util.UUID;
 
 @Service
 public class RatingServiceImpl implements IRatingService {
@@ -23,12 +25,12 @@ public class RatingServiceImpl implements IRatingService {
     }
 
     @Override
-    public Optional<Rating> getRatingByUserId(String userId) {
+    public List<Rating> getRatingByUserId(String userId) {
         return ratingRepository.findByUserId(userId);
     }
 
     @Override
-    public Optional<Rating> getRatingByHotelId(String hotelId) {
+    public List<Rating> getRatingByHotelId(String hotelId) {
         return ratingRepository.findByHotelId(hotelId);
     }
 
@@ -39,6 +41,8 @@ public class RatingServiceImpl implements IRatingService {
 
     @Override
     public Rating saveRating(Rating rating) {
+        UUID randomRatingId = UUID.randomUUID();
+        rating.setRatingId(randomRatingId.toString());
         return ratingRepository.save(rating);
     }
 
@@ -50,5 +54,21 @@ public class RatingServiceImpl implements IRatingService {
             return rating.get();
         }
         return null;
+    }
+
+    public Rating updateRating(String ratingId, Rating updatedRating) {
+        Optional<Rating> existingRating = ratingRepository.findById(ratingId);
+        if (existingRating.isPresent()) {
+            Rating ratingToUpdate = existingRating.get();
+            ratingToUpdate.setUserId(updatedRating.getUserId());
+            ratingToUpdate.setHotelId(updatedRating.getHotelId());
+            ratingToUpdate.setRating(updatedRating.getRating());
+            return ratingRepository.save(ratingToUpdate);
+        }
+        return null;
+    }
+
+    public List<Rating> getAllRatings() {
+        return ratingRepository.findAll();
     }
 }

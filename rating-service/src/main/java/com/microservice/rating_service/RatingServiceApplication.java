@@ -45,7 +45,7 @@ public class RatingServiceApplication {
 		//mvn spring-boot:run
 
 		//----------------------------------------------
-		//MySQL Setup Instructions:
+		// MySQL Setup Instructions:
 		// sudo apt-get update
 		// sudo apt-get install -y mysql-server mysql-client
 
