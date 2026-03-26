@@ -38,7 +38,10 @@ public class UserServiceImpl implements IUserService {
             //fetch details of ratings and hotels from respective microservices using restTemplate
             //get ratings of the user from rating-service
             //example url: https://potential-cod-7qq9jvjg7v6h95g-8082.app.github.dev/ratings/get/user/b49ed02f-b88b-4288-aec9-4fa0d470ce6f
-            String ratingsUrl = "https://potential-cod-7qq9jvjg7v6h95g-8082.app.github.dev/ratings/get/user/" + id;
+            //String ratingsUrl = "https://potential-cod-7qq9jvjg7v6h95g-8082.app.github.dev/ratings/get/user/" + id;
+            //Making ratingsUrl dynamic using - RATING-SERVICE
+            String ratingsUrl = "http://RATING-SERVICE/ratings/get/user/" + id;
+            
             Rating[] ratings = restTemplate.getForObject(ratingsUrl, Rating[].class);
             List<Rating> ratingsList = Arrays.asList(ratings);
 
@@ -48,7 +51,10 @@ public class UserServiceImpl implements IUserService {
             ratingsList.stream().forEach(rating -> {
                 //get hotel details for each rating from hotel-service
                 //Example url: https://potential-cod-7qq9jvjg7v6h95g-8081.app.github.dev/hotels/get/606054b3-8229-4d01-b821-2aaf86064810
-                String hotelUrl = "https://potential-cod-7qq9jvjg7v6h95g-8081.app.github.dev/hotels/get/" + rating.getHotelId();
+                //String hotelUrl = "https://potential-cod-7qq9jvjg7v6h95g-8081.app.github.dev/hotels/get/" + rating.getHotelId();      
+                //Making hotelUrl dynamic using - HOTEL-SERVICE
+                String hotelUrl = "http://HOTEL-SERVICE/hotels/get/" + rating.getHotelId();
+
                 try {
                     Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);
                     logger.info("Hotel details fetched successfully for hotel with id: " + rating.getHotelId());
