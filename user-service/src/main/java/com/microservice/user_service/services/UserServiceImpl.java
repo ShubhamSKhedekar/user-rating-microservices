@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.microservice.user_service.exceptions.ResourceNotFoundException;
+import com.microservice.user_service.feigncleint.IFeignHotelService;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -24,6 +25,9 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private IFeignHotelService feignHotelService;
 
     private Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -56,7 +60,10 @@ public class UserServiceImpl implements IUserService {
                 String hotelUrl = "http://HOTEL-SERVICE/hotels/get/" + rating.getHotelId();
 
                 try {
-                    Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);
+                    //Using feign client instead of rest template to fetch hotel details
+                    //Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);
+                    Hotel hotel = feignHotelService.getHotelById(rating.getHotelId());  
+
                     logger.info("Hotel details fetched successfully for hotel with id: " + rating.getHotelId());
                     logger.info("Hotel details: " + hotel);
                     rating.setHotel(hotel);

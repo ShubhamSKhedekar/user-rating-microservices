@@ -102,6 +102,15 @@ public class HotelServiceApplication {
 		// password
 
 		// mvn spring-boot:run
+
+		//DOWNGRADE SPRINGBOOT VERSION TO 3.2.5
+		// sudo apt update
+		// sudo apt install openjdk-17-jdk -y
+		// sudo update-alternatives --config java
+		// export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+		// export PATH=$JAVA_HOME/bin:$PATH
+		// java -version
+		// mvn clean install
 	}
 
 }

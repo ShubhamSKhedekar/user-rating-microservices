@@ -59,6 +59,26 @@ and dependencyManagement,
 
 
 MICROSERVICES COMMUNICATION USING REST-TEMPLATE
+- In your CustomConfiguration.java file, create @bean of RestTemplate
+- Calling other services with RestTemplate from user-service:
+  String hotelUrl = "https://potential-cod-7qq9jvjg7v6h95g-8081.app.github.dev/hotels/get/" + rating.getHotelId();      
+- Making hotelUrl dynamic, using name - HOTEL-SERVICE.
+  String hotelUrl = "http://HOTEL-SERVICE/hotels/get/" + rating.getHotelId();
+- RestTemplate bean also has responsibility for load balancing incase of multiple instances
+    @Bean
+    @LoadBalanced
+    public RestTemplate getRestTemplate(){
+        return new RestTemplate();
+    }
+- Aletrnate way could using Feign Client for communication with other services
+
+
+FEIGN CLIENT FOR COMMUNICATION BTWN SERVICES 
+- Add dependancy & Use @EnableFeignClients in main class for enabling feign client
+- Create interface with @FeignClient(name = "HOTEL-SERVICE") with targeted service name
+, having abstract methods with same mappings of targeted service's controller's method
+
+
 
 
 
