@@ -71,6 +71,11 @@ MICROSERVICES COMMUNICATION USING REST-TEMPLATE
         return new RestTemplate();
     }
 - Aletrnate way could using Feign Client for communication with other services
+- RestTemplate works with service names like RATING-SERVICE (any other services) 
+  because it is annotated with @LoadBalanced, which uses Spring Cloud LoadBalancer to 
+  fetch service instances from Eureka and resolve the service name into an 
+  actual IP and port. Without Eureka or without @LoadBalanced, the call would 
+  fail with Unknown Host.
 
 
 FEIGN CLIENT FOR COMMUNICATION BTWN SERVICES 
