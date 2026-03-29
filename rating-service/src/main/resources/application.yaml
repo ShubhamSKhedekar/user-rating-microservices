@@ -35,7 +35,8 @@ server:
 
 spring:
   application:
-    name: rating-service
+    # name: rating-service
+    name: RATING-SERVICE
 
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/ratingservice_db

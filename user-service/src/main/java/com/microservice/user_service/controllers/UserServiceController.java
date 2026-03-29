@@ -18,13 +18,13 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/user-service")
+@RequestMapping("/user")
 public class UserServiceController {
 
     @Autowired
     private IUserService userService;
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<User> fetchUserById(@PathVariable String id) {
         try {
             User user = userService.getUserById(id);
@@ -39,7 +39,7 @@ public class UserServiceController {
         }
     }
 
-    @GetMapping("/user/email/{email}")
+    @GetMapping("/email/{email}")
     public ResponseEntity<User> fetchUserByEmail(@PathVariable String email) {
         try {          
             User user = userService.getUserByEmail(email);
@@ -54,12 +54,12 @@ public class UserServiceController {
         }
     }
 
-    @PostMapping("/user/save")
+    @PostMapping("/save")
     public ResponseEntity<User> saveUser(@RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(user));  
     }
 
-    @PutMapping("/user/update")
+    @PutMapping("/update")
     public ResponseEntity<User> updateUser(@RequestBody User user) {
         User existingUser = userService.getUserById(user.getUserId());
         if (existingUser == null) {
@@ -74,13 +74,13 @@ public class UserServiceController {
         
     }
 
-    @DeleteMapping("/user/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable String id) {
         userService.deleteUserById(id); 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/user/fetch-all")
+    @GetMapping("/fetch-all")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
