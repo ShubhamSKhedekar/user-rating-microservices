@@ -61,9 +61,13 @@ public class RatingServiceApplication {
 		// Password: password
 
 		// Create DB & user:
-		// CREATE DATABASE rating_service;
-		//CREATE USER 'rating_service'@'%' IDENTIFIED BY 'password';
+		// CREATE DATABASE ratingservice_db;
+		// CREATE USER 'rating_service'@'%' IDENTIFIED BY 'password';
 		// GRANT ALL PRIVILEGES ON ratingservice_db.* TO 'rating_service'@'%';
+		// FLUSH PRIVILEGES;
+
+		// CREATE USER 'rating_service'@'127.0.0.1' IDENTIFIED BY 'password';
+		// GRANT ALL PRIVILEGES ON ratingservice_db.* TO 'rating_service'@'127.0.0.1';
 		// FLUSH PRIVILEGES;
 
 		// # Stop app

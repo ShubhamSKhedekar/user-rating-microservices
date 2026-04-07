@@ -33,6 +33,10 @@ public class UserServiceApplication {
 		// GRANT ALL PRIVILEGES ON userservice_db.* TO 'userservice'@'localhost';
 		// FLUSH PRIVILEGES;
 
+		// CREATE USER 'user_service'@'127.0.0.1' IDENTIFIED BY 'password';
+		// GRANT ALL PRIVILEGES ON userservice_db.* TO 'user_service'@'127.0.0.1';
+		// FLUSH PRIVILEGES;
+
 		// # Stop app
 		// CTRL + C
 
@@ -50,7 +54,7 @@ public class UserServiceApplication {
 		// export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 		// export PATH=$JAVA_HOME/bin:$PATH
 		// java -version
-		//mvn clean install
+		// mvn clean install
 	}
 
 }
