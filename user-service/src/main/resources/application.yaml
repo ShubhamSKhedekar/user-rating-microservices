@@ -1,7 +1,9 @@
 spring:
   application:
-    # name: user-service
     name: USER-SERVICE
+
+  profiles:
+    active: default
 
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/userservice_db
@@ -15,12 +17,15 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     show-sql: true
 
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
+  config:
+    import: "optional:configserver:https://verbose-space-meme-4447pjpxqjxcpxp-8085.app.github.dev/"  
 
-    fetch-registry: true
-    register-with-eureka: true
+# eureka:
+#   instance:
+#     prefer-ip-address: true
+#   client:
+#     service-url:
+#       defaultZone: http://localhost:8761/eureka/
+
+#     fetch-registry: true
+#     register-with-eureka: true
