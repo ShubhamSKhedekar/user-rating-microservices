@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.microservice.user_service.exceptions.ResourceNotFoundException;
 import java.util.List;
-
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 @RestController
 @RequestMapping("/user")
@@ -25,6 +25,7 @@ public class UserServiceController {
     private IUserService userService;
 
     @GetMapping("/{id}")
+    @CircuitBreaker(name = "userServiceCircuitBreaker", fallbackMethod = "fetchUserByIdFallback")
     public ResponseEntity<User> fetchUserById(@PathVariable String id) {
         try {
             User user = userService.getUserById(id);
@@ -37,6 +38,20 @@ public class UserServiceController {
             System.out.println("Exception occurred: " + ex.getClass().getName());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new User("NA", "Internal server error occurred.", "NA", "1234567890", null));
         }
+    }
+
+    //fallback method for fetchUserById method
+    //Fallback method should have same return type and parameters as the original method along with an additional parameter of type Throwable to capture the exception details
+    public ResponseEntity<User> fetchUserByIdFallback(String id, Throwable ex) {
+        System.out.println("inside fallback method of fetchUserById method");
+        System.out.println("Exception occurred: " + ex.getClass().getName());
+        User user = User.builder()
+                        .userId(id)
+                        .userName("NA")
+                        .userEmail("NA")
+                        .userInfo("Other services unavailable.")
+                        .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(user);
     }
 
     @GetMapping("/email/{email}")

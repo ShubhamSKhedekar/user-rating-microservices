@@ -84,6 +84,61 @@ FEIGN CLIENT FOR COMMUNICATION BTWN SERVICES
 , having abstract methods with same mappings of targeted service's controller's method
 
 
+IMPLEMENTING CIRCUIT BREAKER PATTERN
+- In USER-SERVICE, circuit breaker is added
+- Add dependancy actuator, aop and resilience4j-spring-boot3 - to enable annotations and 
+classes
+- In target controller's method, use @CircuitBreaker & maintain fallback method
+@CircuitBreaker(name = "userServiceCircuitBreaker", fallbackMethod = "fetchUserByIdFallback")
+- Fallback method should have same return type and parameters as the original method along 
+with an additional parameter of type Throwable to capture the exception details
+FLOW:
+  1. Failure Decision:
+  minimumNumberOfCalls: 5
+  failureRateThreshold: 50
+  👉 Meaning:
+  Wait for at least 5 calls
+  If 50% fail, then → OPEN circuit
+  📌 Easy memory:
+  “5 calls → 50% fail → open”
+
+  2. Sliding Window:
+  slidingWindowSize: 10
+  slidingWindowType: COUNT_BASED
+  👉 Meaning:
+  Check last 10 requests
+  Based on count (not time)
+  📌 Memory:
+  “Check last 10 calls”
+
+  3. Open State Timing:
+  waitDurationInOpenState: 6s
+  👉 Meaning:
+  Stay OPEN for 6 seconds
+  No calls allowed during this time
+  📌 Memory:
+  “Fail → sleep 6 sec”
+
+  4. Half-Open Testing:
+  permittedNumberOfCallsInHalfOpenState: 3
+  👉 Meaning:
+  After 6 sec → allow only 3 test calls
+  📌 Memory:
+  “After sleep → test 3 calls”
+
+  5. Auto Transition:
+  automaticTransitionFromOpenToHalfOpenEnabled: true
+  👉 Meaning:
+  Automatically move from OPEN → HALF-OPEN
+  (no manual trigger needed)
+
+  6. Monitoring / Metric:
+  registerHealthIndicator: true
+  eventConsumerBufferSize: 10
+  👉 Meaning:
+  Expose health info (for Actuator)
+  Store last 10 events (for debugging)
+
 
 
 

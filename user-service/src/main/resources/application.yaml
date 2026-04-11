@@ -29,3 +29,37 @@ spring:
 
 #     fetch-registry: true
 #     register-with-eureka: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCircuitBreaker:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        minimumNumberOfCalls: 5  
+        failureRateThreshold: 50
+        waitDurationInOpenState: 6s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+# 👉 Imagine this:
+# Service runs normally
+# Out of last 10 calls, if 5 fail → ❌ OPEN
+# Wait 6 seconds
+# Allow 3 test calls
+# If success → ✅ CLOSE
+# If fail → ❌ OPEN again
