@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.microservice.user_service.exceptions.ResourceNotFoundException;
 import java.util.List;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import java.lang.NullPointerException;
+import java.lang.IllegalStateException;
 
 @RestController
 @RequestMapping("/user")
@@ -26,13 +28,18 @@ public class UserServiceController {
 
     @GetMapping("/{id}")
     @CircuitBreaker(name = "userServiceCircuitBreaker", fallbackMethod = "fetchUserByIdFallback")
-    public ResponseEntity<User> fetchUserById(@PathVariable String id) {
+    public ResponseEntity<User> fetchUserById(@PathVariable String id) throws IllegalStateException{    
         try {
             User user = userService.getUserById(id);
             return ResponseEntity.status(HttpStatus.OK).body(user);
-        } catch (ResourceNotFoundException e) {
+        } 
+        catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new User("NA", "User not present.", "NA", "1234567890", null));
         }
+        catch(NullPointerException | IllegalStateException ex) {
+            System.out.println("inside catch block of fetchUserById method");
+            System.out.println("Exception occurred: " + ex.getClass().getName());
+            throw new IllegalStateException("Required service is currently unavailable. Please try again later.");}
         catch (Exception ex) {
             System.out.println("inside catch block of fetchUserById method");
             System.out.println("Exception occurred: " + ex.getClass().getName());
@@ -49,7 +56,7 @@ public class UserServiceController {
                         .userId(id)
                         .userName("NA")
                         .userEmail("NA")
-                        .userInfo("Other services unavailable.")
+                        .userInfo(ex.getMessage())
                         .build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(user);
     }

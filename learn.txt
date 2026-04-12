@@ -138,7 +138,94 @@ FLOW:
   👉 Meaning:
   Expose health info (for Actuator)
   Store last 10 events (for debugging)
-
+- Circuit Breaker output : https://verbose-space-meme-4447pjpxqjxcpxp-8080.app.github.dev/actuator/health
+{
+    "status": "UP",
+    "components": {
+        "circuitBreakers": {
+            "status": "UP",
+            "details": {
+                "userServiceCircuitBreaker": {
+                    "status": "UP",
+                    "details": {
+                        "failureRate": "-1.0%",
+                        "failureRateThreshold": "50.0%",
+                        "slowCallRate": "-1.0%",
+                        "slowCallRateThreshold": "100.0%",
+                        "bufferedCalls": 3,
+                        "slowCalls": 0,
+                        "slowFailedCalls": 0,
+                        "failedCalls": 2,
+                        "notPermittedCalls": 0,
+                        "state": "CLOSED"
+                    }
+                }
+            }
+        },
+        "clientConfigServer": {
+            "status": "UP",
+            "details": {
+                "propertySources": [
+                    "configserver:https://github.com/ShubhamSKhedekar/user-rating-microservice-config/application.yml",
+                    "configClient"
+                ]
+            }
+        },
+        "db": {
+            "status": "UP",
+            "details": {
+                "database": "MySQL",
+                "validationQuery": "isValid()"
+            }
+        },
+        "discoveryComposite": {
+            "status": "UP",
+            "components": {
+                "discoveryClient": {
+                    "status": "UP",
+                    "details": {
+                        "services": [
+                            "api-gateway",
+                            "config-server",
+                            "rating-service",
+                            "hotel-service",
+                            "user-service"
+                        ]
+                    }
+                },
+                "eureka": {
+                    "description": "Remote status from Eureka server",
+                    "status": "UP",
+                    "details": {
+                        "applications": {
+                            "API-GATEWAY": 1,
+                            "CONFIG-SERVER": 1,
+                            "RATING-SERVICE": 1,
+                            "HOTEL-SERVICE": 1,
+                            "USER-SERVICE": 1
+                        }
+                    }
+                }
+            }
+        },
+        "diskSpace": {
+            "status": "UP",
+            "details": {
+                "total": 33636024320,
+                "free": 18106867712,
+                "threshold": 10485760,
+                "path": "/workspaces/user-rating-microservices/user-service/.",
+                "exists": true
+            }
+        },
+        "ping": {
+            "status": "UP"
+        },
+        "refreshScope": {
+            "status": "UP"
+        }
+    }
+}
 
 
 

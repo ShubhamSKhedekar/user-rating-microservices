@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+ 
 
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -45,9 +46,9 @@ public class UserServiceApplication {
 		// # Restart
 		// mvn spring-boot:run
 
-		//cat target/surefire-reports/*.txt
+		// cat target/surefire-reports/*.txt
 
-		//DOWNGRADE SPRINGBOOT VERSION TO 3.2.5
+		// DOWNGRADE SPRINGBOOT VERSION TO 3.2.5
 		// sudo apt update
 		// sudo apt install openjdk-17-jdk -y
 		// sudo update-alternatives --config java

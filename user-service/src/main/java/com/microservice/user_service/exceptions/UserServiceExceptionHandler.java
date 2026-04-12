@@ -19,14 +19,14 @@ public class UserServiceExceptionHandler {
         return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse> handleGenericException(Exception ex) {
-        ApiResponse apiResponse = ApiResponse.builder()
-                .message(ex.getMessage()+" Please contact support.")
-                .success(true)
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    // @ExceptionHandler(Exception.class)
+    // public ResponseEntity<ApiResponse> handleGenericException(Exception ex) {
+    //     ApiResponse apiResponse = ApiResponse.builder()
+    //             .message(ex.getMessage()+" Please contact support.")
+    //             .success(true)
+    //             .status(HttpStatus.INTERNAL_SERVER_ERROR)
+    //             .build();
+    //     return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
 
 }
