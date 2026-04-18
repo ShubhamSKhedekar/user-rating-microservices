@@ -26,7 +26,6 @@ spring:
 #   client:
 #     service-url:
 #       defaultZone: http://localhost:8761/eureka/
-
 #     fetch-registry: true
 #     register-with-eureka: true
 
@@ -56,10 +55,46 @@ resilience4j:
         slidingWindowSize: 10
         slidingWindowType: COUNT_BASED
 
-# 👉 Imagine this:
+# Full Circuit Breaker Flow:
 # Service runs normally
 # Out of last 10 calls, if 5 fail → ❌ OPEN
 # Wait 6 seconds
 # Allow 3 test calls
 # If success → ✅ CLOSE
 # If fail → ❌ OPEN again
+
+  retry:
+    instances:
+      userServiceRetry:
+        maxAttempts: 3  #maximum 3 times (1 original + 2 retries)
+        waitDuration: 2s  #Wait 2 seconds between retries
+        retryExceptions:
+          - java.lang.IllegalStateException  #Retry only for allowed Exceptions
+        ignoreExceptions:
+          - java.lang.NullPointerException  #Don't retry for this Exceptions
+
+# Full Retry Flow:
+# Call service
+# If IllegalStateException occurs → retry
+# Wait 2 sec
+# Retry again
+# Max 3 attempts
+# If still fails → final failure
+# 👉 If NullPointerException → ❌ no retry, fail instantly
+
+  rateLimiter:
+    instances:
+      userServiceRateLimiter:
+        limitForPeriod: 5  # Max 5 calls per period
+        limitRefreshPeriod: 1m  # in every 1 minute
+        # timeoutDuration: 0  # No waiting, fail immediately if limit exceeded - (fail fast)
+        timeoutDuration: 5s
+# Full Flow Example
+# Scenario (within 1 minute)
+# Request 1 → ✅ allowed
+# Request 2 → ✅ allowed
+# Request 3 → ✅ allowed
+# Request 4 → ✅ allowed
+# Request 5 → ✅ allowed
+# Request 6 → ❌ rejected immediately
+# 👉 Because limit reached

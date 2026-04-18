@@ -228,6 +228,60 @@ FLOW:
 }
 
 
+RETRY MECHANISM USING resilience4j
+Request comes
+→ Retry tries 3 times
+→ Failures counted in Circuit Breaker
+→ If threshold crossed → Circuit OPEN
+→ Fallback executed
+
+Next request:
+→ Circuit OPEN
+→ No retry
+→ Direct fallback
+
+- Use @Retry in controller method, which you are targeting
+    @Retry(name = "userServiceRetry", fallbackMethod = "fetchUserByIdFallback")
+- Maintain different fallback method of circuitbreaker and retry mechanism
+- Fallback is executed ONLY after:
+    - Retry is exhausted OR
+    - Circuit is OPEN
+- Maintain configuration:
+    resilience4j:
+        retry:
+        instances:
+        userServiceRetry:
+            maxAttempts: 3  #maximum 3 times (1 original + 2 retries)
+            waitDuration: 2s  #Wait 2 seconds between retries
+            retryExceptions:
+            - java.lang.IllegalStateException  #Retry only for allowed Exceptions
+            ignoreExceptions:
+            - java.lang.NullPointerException  #Don't retry for this Exceptions
+
+
+RATE LIMITER USING resilience4j
+- Helps in security and performance of application
+- Security: does not allow spam/bots to call service multiple times unnecessarily, leading
+to server down
+-Performace: Makes application always available to serve genuine requests from Clients, improved
+scalabilty, reliability
+- Need, same dependancy as CircuitBreaker - aop and resilience4j-spring-boot3
+@RateLimiter(name = "userServiceRateLimiter", fallbackMethod = "rateLimitFetchUserByIdFallback")
+- Max 5 calls
+- Per 1 minute
+- No waiting (fail fast)
+- Configuration:
+    resilience4j:
+        rateLimiter:
+            instances:
+            userServiceRateLimiter:
+                limitForPeriod: 5  # Max 5 calls per period
+                limitRefreshPeriod: 1m  # in every 1 minute
+                timeoutDuration: 0  # No waiting, fail immediately if limit exceeded - (fail fast)
+-Balanced configuration:
+    limitForPeriod: 10
+    limitRefreshPeriod: 1s
+    timeoutDuration: 2s
 
 
 

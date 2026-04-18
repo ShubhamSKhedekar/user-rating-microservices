@@ -18,6 +18,10 @@ import java.util.List;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import java.lang.NullPointerException;
 import java.lang.IllegalStateException;
+import io.github.resilience4j.retry.annotation.Retry;
+import java.util.logging.Logger;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 
 @RestController
 @RequestMapping("/user")
@@ -26,8 +30,14 @@ public class UserServiceController {
     @Autowired
     private IUserService userService;
 
+    private int retryCount = 0; // To keep track of retry attempts
+    private Logger logger = Logger.getLogger(UserServiceController.class.getName());
+
+
     @GetMapping("/{id}")
     @CircuitBreaker(name = "userServiceCircuitBreaker", fallbackMethod = "fetchUserByIdFallback")
+    @Retry(name = "userServiceRetry", fallbackMethod = "retryFetchUserByIdFallback")
+    @RateLimiter(name = "userServiceRateLimiter", fallbackMethod = "rateLimitFetchUserByIdFallback")
     public ResponseEntity<User> fetchUserById(@PathVariable String id) throws IllegalStateException{    
         try {
             User user = userService.getUserById(id);
@@ -39,6 +49,8 @@ public class UserServiceController {
         catch(NullPointerException | IllegalStateException ex) {
             System.out.println("inside catch block of fetchUserById method");
             System.out.println("Exception occurred: " + ex.getClass().getName());
+            retryCount++;
+            logger.warning("Attempt " + retryCount + ": Exception occurred while fetching user with id: " + id + ". Exception: " + ex.getMessage());
             throw new IllegalStateException("Required service is currently unavailable. Please try again later.");}
         catch (Exception ex) {
             System.out.println("inside catch block of fetchUserById method");
@@ -47,7 +59,7 @@ public class UserServiceController {
         }
     }
 
-    //fallback method for fetchUserById method
+    //CIRCUIT BREAKER fallback method for fetchUserById method
     //Fallback method should have same return type and parameters as the original method along with an additional parameter of type Throwable to capture the exception details
     public ResponseEntity<User> fetchUserByIdFallback(String id, Throwable ex) {
         System.out.println("inside fallback method of fetchUserById method");
@@ -56,7 +68,35 @@ public class UserServiceController {
                         .userId(id)
                         .userName("NA")
                         .userEmail("NA")
-                        .userInfo(ex.getMessage())
+                        .userInfo(ex.getMessage() + " Circuit breaker fallback executed.")
+                        .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(user);
+    }
+
+    //RETRY fallback method for fetchUserById method
+    //Fallback method should have same return type and parameters as the original method along with an additional parameter of type Throwable to capture the exception details
+    public ResponseEntity<User> retryFetchUserByIdFallback(String id, Throwable ex) {
+        System.out.println("inside fallback method of fetchUserById method");
+        System.out.println("Exception occurred: " + ex.getClass().getName());
+        User user = User.builder()
+                        .userId(id)
+                        .userName("NA")
+                        .userEmail("NA")
+                        .userInfo(ex.getMessage() + " Retry fallback executed.")
+                        .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(user);
+    }
+
+    //RATE LIMITER fallback method for fetchUserById method
+    //Fallback method should have same return type and parameters as the original method along with an additional parameter of type Throwable to capture the exception details
+    public ResponseEntity<User> rateLimitFetchUserByIdFallback(String id, Throwable ex) {
+        System.out.println("inside fallback method of fetchUserById method");
+        System.out.println("Exception occurred: " + ex.getClass().getName());
+        User user = User.builder()
+                        .userId(id)
+                        .userName("NA")
+                        .userEmail("NA")
+                        .userInfo(ex.getMessage() + " Rate limiter fallback executed.")
                         .build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(user);
     }
@@ -93,7 +133,6 @@ public class UserServiceController {
             User updatedUser = userService.updateUser(existingUser);
             return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
         }
-        
     }
 
     @DeleteMapping("/delete/{id}")
