@@ -98,3 +98,4 @@ resilience4j:
 # Request 5 → ✅ allowed
 # Request 6 → ❌ rejected immediately
 # 👉 Because limit reached
+

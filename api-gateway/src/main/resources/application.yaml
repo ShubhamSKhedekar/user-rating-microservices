@@ -20,8 +20,29 @@ spring:
           predicates:
             - Path=/ratings/**
 
+  #For Okta integration, to ensure that the original client IP and other headers are forwarded correctly
+  security:
+    oauth2:
+      client:
+        registration:
+          okta:
+            # redirect-uri: "https://verbose-space-meme-4447pjpxqjxcpxp-8084.app.github.dev/login/oauth2/code/okta"
+            # client-id: 0oa122zy592GntPMu698
+            # client-secret: p6z2ZO1AR-OdZO-IMqG1WGhLzwwNdVTBJS-IU_xRM1Z1weJGdkRvpMywexTpxG_7
+            # scope: openid, profile, email, offline_access
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        # provider:
+        #   okta:
+        #     issuer-uri: https://integrator-9095306.okta.com/oauth2/default
+        #     authorization-uri: https://integrator-9095306.okta.com/oauth2/default/v1/authorize
+        #     token-uri: https://integrator-9095306.okta.com/oauth2/default/v1/token
+        #     user-info-uri: https://integrator-9095306.okta.com/oauth2/default/v1/userinfo
+        #     jwk-set-uri: https://integrator-9095306.okta.com/oauth2/default/v1/keys
+
 server:
   port: 8084
+  # For Okta integration, to ensure that the original client IP and other headers are forwarded correctly
+  forward-headers-strategy: framework
 
 eureka:
   client:
@@ -32,5 +53,13 @@ eureka:
   instance:
     prefer-ip-address: true
 
+# Okta Configuration
+okta:
+  oauth2:
+    client-id: 0oa122zy592GntPMu698
+    client-secret: p6z2ZO1AR-OdZO-IMqG1WGhLzwwNdVTBJS-IU_xRM1Z1weJGdkRvpMywexTpxG_7
+    issuer: https://integrator-9095306.okta.com/oauth2/default
+    audience: api://default
+    scopes: openid, profile, email, offline_access
 
 

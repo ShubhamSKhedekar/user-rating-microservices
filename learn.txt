@@ -278,13 +278,44 @@ scalabilty, reliability
                 limitForPeriod: 5  # Max 5 calls per period
                 limitRefreshPeriod: 1m  # in every 1 minute
                 timeoutDuration: 0  # No waiting, fail immediately if limit exceeded - (fail fast)
--Balanced configuration:
+- Balanced configuration:
     limitForPeriod: 10
     limitRefreshPeriod: 1s
     timeoutDuration: 2s
 
 
-
-
-
-
+OKTA FOR AUTHENTICATION AND AUTHORIZATION WITH SPRING SECURITY 
+- Okta to be implemented in api-gateway, as first client requests reaches gateway, then 
+targeted services
+- Add 2 necessary dependancies, okta and spring security
+- Create Configuration file, to create Bean of SecurityWebFilterChain 
+- So your Gateway is doing TWO roles:
+    1. OAuth2 Client → handles login (Okta) (authentication)
+    2. Resource Server → validates JWT
+@Bean
+    public SecurityWebFilterChain getSecurityWebFilterChain(ServerHttpSecurity http) 
+    {
+        return http
+                .csrf().disable() 
+                // Disable CSRF protection (not needed for stateless APIs using JWT)
+                .authorizeExchange()
+                // Start defining authorization rules for incoming requests
+                .pathMatchers("/auth/**").permitAll()
+                // Allow all requests to /auth/** without authentication (public endpoints)
+                .anyExchange().authenticated()
+                // Any other request must be authenticated
+                .and()
+                .oauth2Login()
+                // Enables OAuth2 login (redirects user to Okta login page)
+                .and()
+                .oauth2Client()
+                // Enables OAuth2 client features (used for token exchange & communication with Okta)
+                .and()
+                .oauth2ResourceServer()
+                // Configures this app as a Resource Server
+                .jwt()
+                // Enables JWT token validation for incoming requests
+                .build();
+                // Build and return the security filter chain
+    }
+- Make controller method, when 
