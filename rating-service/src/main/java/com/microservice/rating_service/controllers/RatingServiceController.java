@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.microservice.rating_service.entities.Rating;
 import com.microservice.rating_service.services.IRatingService;
 
@@ -24,12 +24,14 @@ public class RatingServiceController {
     @Autowired
     private IRatingService ratingService;
 
+    @PreAuthorize("hasAuthority('Admin') || hasAuthority('SCOPE_internal')")
     @GetMapping("/get/id/{ratingId}")
     public ResponseEntity<Rating> fetchRatingById(@PathVariable String ratingId) {
         Optional<Rating> rating = ratingService.getRatingById(ratingId);
         return ResponseEntity.status(HttpStatus.OK).body(rating.get());
     }
 
+    @PreAuthorize("hasAuthority('SCOPE_internal')")    
     @GetMapping("/get/user/{userId}")
     public ResponseEntity<List<Rating>> fetchRatingByUserId(@PathVariable String userId) {
         List<Rating> rating = ratingService.getRatingByUserId(userId);
@@ -54,6 +56,7 @@ public class RatingServiceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRating);     
     }
 
+    @PreAuthorize("hasAuthority('Admin')")
     @DeleteMapping("/delete/{ratingId}")
     public ResponseEntity<Rating> deleteRating(@PathVariable String ratingId) {
         Rating rating = ratingService.deleteRatingById(ratingId);

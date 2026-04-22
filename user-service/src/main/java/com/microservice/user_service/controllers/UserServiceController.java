@@ -22,6 +22,7 @@ import io.github.resilience4j.retry.annotation.Retry;
 import java.util.logging.Logger;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/user")
@@ -116,6 +117,11 @@ public class UserServiceController {
         }
     }
 
+    // To-be-removed--
+    // @PreAuthorize annotation is used to restrict access to the endpoint based on the 
+    // roles or authorities of the user. In this case, only users with 'Admin' authority 
+    // or 'SCOPE_internal' authority can access this endpoint to save a new user.
+    @PreAuthorize("hasAuthority('Admin') || hasAuthority('SCOPE_internal')")
     @PostMapping("/save")
     public ResponseEntity<User> saveUser(@RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUser(user));  
@@ -135,10 +141,11 @@ public class UserServiceController {
         }
     }
 
+    @PreAuthorize("hasAuthority('Admin')")
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable String id) {
+    public ResponseEntity<String> deleteUserById(@PathVariable String id) {
         userService.deleteUserById(id); 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK).body("Deleted user of id: " + id);
     }
 
     @GetMapping("/fetch-all")

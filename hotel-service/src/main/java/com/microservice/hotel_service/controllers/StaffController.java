@@ -6,11 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/staff")
 public class StaffController {
 
+    @PreAuthorize("hasAuthority('Admin') || hasAuthority('SCOPE_internal')")
     @RequestMapping(method = RequestMethod.GET, path = "/get")
     public ResponseEntity<List<String>> getStaff() {
         return ResponseEntity.ok

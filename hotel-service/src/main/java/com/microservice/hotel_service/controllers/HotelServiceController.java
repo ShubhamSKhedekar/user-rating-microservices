@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.microservice.hotel_service.entities.Hotel;
 import com.microservice.hotel_service.services.IHotelService;
 
@@ -24,6 +24,7 @@ public class HotelServiceController {
     @Autowired
     private IHotelService hotelService;
 
+    @PreAuthorize("hasAuthority('SCOPE_internal')")
     @GetMapping("/get/{hotelId}")
     public ResponseEntity<Hotel> fetchHotelById(@PathVariable String hotelId) {
         Optional<Hotel> hotel = hotelService.getHotelById(hotelId);
@@ -37,6 +38,7 @@ public class HotelServiceController {
         return ResponseEntity.status(HttpStatus.OK).body(hotels);
     }
 
+    @PreAuthorize("hasAuthority('Admin')")
     @PostMapping("/create-hotel")
     public ResponseEntity<Hotel> createHotel(@RequestBody Hotel hotel) {
         Hotel createdHotel = hotelService.createHotel(hotel);

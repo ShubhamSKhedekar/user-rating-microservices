@@ -60,6 +60,6 @@ okta:
     client-secret: p6z2ZO1AR-OdZO-IMqG1WGhLzwwNdVTBJS-IU_xRM1Z1weJGdkRvpMywexTpxG_7
     issuer: https://integrator-9095306.okta.com/oauth2/default
     audience: api://default
-    scopes: openid, profile, email, offline_access
+    scopes: openid, profile, email, offline_access, internal
 
 

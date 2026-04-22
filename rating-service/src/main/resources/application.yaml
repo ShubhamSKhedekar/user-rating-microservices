@@ -59,3 +59,9 @@ eureka:
 
     fetch-registry: true
     register-with-eureka: true
+
+# Okta Configuration
+okta:
+  oauth2:
+    issuer: https://integrator-9095306.okta.com/oauth2/default
+    audience: api://default
