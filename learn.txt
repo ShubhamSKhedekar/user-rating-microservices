@@ -1,5 +1,16 @@
 USER-RATING-MICROSERVICES PROJECT DETAILS
 
+PROJECT ARCHITECTURE
+- client-server architecture 
+- Client's any request -> api-gateway -> analyzes request URL & decides where(service) request should be 
+routed -> targeted service's controller & process request with sending response
+- Okta Auth for securing api requests and its authentication-authorization part at api-gateway
+- service-registry -> saves all details of all services with name, url, port number, status
+- config-server -> Used github repository, to save common configurations -> 
+fetched by services, while running
+- each service has individual DBs
+
+
 SETTING UP PROJECTS
 - Created all basic maven projects with help of spring initializer, user-service, 
 hotel-service, rating-service & service-registry
@@ -9,7 +20,25 @@ by Matheus Teixeira
 - Created separate individual connections with SQLTools option on left side
 - Made similar configuration of db name, user name, password and its db server port number in 
 application.yml
+- Also, need to install sql server and client in codespace, and start the same before running
+your application
+- Also created user with same username & password, given while creating connection. Granting
+same user all access for that DB
+Mentioned in each application Main class file.
 - DB related terminal commands already existing in Main class of individual projects.
+- All services were initially created with JDK 25 (java ver 25) and springboot 4.0.3 (later changed)
+
+
+GENERATE ID FOR ENTITY CLASSES FOR DB
+-   UUID randomRatingId = UUID.randomUUID();
+    rating.setRatingId(randomRatingId.toString());
+    return ratingRepository.save(rating);
+
+
+USER-SERVICE
+- To prevent entity class feild, save in db - use @Transient
+    @Transient
+    private List<Rating> ratings = new ArrayList<>();   
 
 
 CREATING SERVICE-REGISTRY
@@ -35,7 +64,7 @@ spring-cloud-starter-netflix-eureka-client.
 -In other services (client) application.yml configuration, 
 eureka:
   instance:
-    prefer-ip-address: true
+    prefer-ip-address: true  --It forces Eureka to register services using their IP address instead of hostname
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
@@ -70,6 +99,8 @@ MICROSERVICES COMMUNICATION USING REST-TEMPLATE
     public RestTemplate getRestTemplate(){
         return new RestTemplate();
     }
+- In service class, 
+    Hotel hotel = restTemplate.getForObject(hotelUrl, Hotel.class);
 - Aletrnate way could using Feign Client for communication with other services
 - RestTemplate works with service names like RATING-SERVICE (any other services) 
   because it is annotated with @LoadBalanced, which uses Spring Cloud LoadBalancer to 
@@ -80,8 +111,69 @@ MICROSERVICES COMMUNICATION USING REST-TEMPLATE
 
 FEIGN CLIENT FOR COMMUNICATION BTWN SERVICES 
 - Add dependancy & Use @EnableFeignClients in main class for enabling feign client
+    <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+	</dependency>
 - Create interface with @FeignClient(name = "HOTEL-SERVICE") with targeted service name
-, having abstract methods with same mappings of targeted service's controller's method
+, having abstract methods with same mappings(path & method type) of targeted service's 
+controller's method.
+
+
+API-GATEWAY IMPLEMENTION
+- If you want to implement api-gateway, the dependancies and classes associated with it, need
+java 8 or above and sprinboot version 2 and above
+- As we had Java 25 and sprinboot 4, need to downgrade to above mentioned, all services/applications
+are downgraded
+- steps:  DOWNGRADE SPRINGBOOT VERSION TO 3.2.5
+    sudo apt update
+    sudo apt install openjdk-17-jdk -y
+    sudo update-alternatives --config java
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    export PATH=$JAVA_HOME/bin:$PATH
+    java -version
+    mvn clean install
+- dependancies in api-gateway:
+spring-boot-starter-webflux, spring-cloud-starter-gateway, spring-cloud-starter, spring-cloud-starter-netflix-eureka-client
+- webflux and gateway dependancies are important for api-gateway function, rest 2 are for service
+registry related
+- Configuiration in yml:
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: USER-SERVICE
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user/**
+
+
+CONFIG-SERVER IMPLEMENTION
+- Used to save configuration, which could be fetched by services while running
+- Here its done by maintaining configurations in github
+- Add dependancies;
+spring-cloud-config-server, spring-cloud-starter-netflix-eureka-client, spring-cloud-starter (optional)
+- Use @EnableConfigServer, on main class, to enable config-server functionality
+- Configuiration in yml:
+spring:
+  application:
+    name: CONFIG-SERVER
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/ShubhamSKhedekar/user-rating-microservice-config
+          clone-on-start: true
+- You may test it, on any browser - https://servername:portnumber/application/default
+here we may have codespace config-server application url after running
+
+
+FAULT TOLERANCE DIFFERENT METHODS 
+- circuit breaker pattern, retry mechanism, rateLimiter
 
 
 IMPLEMENTING CIRCUIT BREAKER PATTERN
@@ -92,7 +184,21 @@ classes
 @CircuitBreaker(name = "userServiceCircuitBreaker", fallbackMethod = "fetchUserByIdFallback")
 - Fallback method should have same return type and parameters as the original method along 
 with an additional parameter of type Throwable to capture the exception details
-FLOW:
+- configuration in yml for circuit breaker:
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCircuitBreaker:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        minimumNumberOfCalls: 5  
+        failureRateThreshold: 50
+        waitDurationInOpenState: 6s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+- Flow:
   1. Failure Decision:
   minimumNumberOfCalls: 5
   failureRateThreshold: 50
@@ -249,14 +355,14 @@ Next request:
 - Maintain configuration:
     resilience4j:
         retry:
-        instances:
-        userServiceRetry:
-            maxAttempts: 3  #maximum 3 times (1 original + 2 retries)
-            waitDuration: 2s  #Wait 2 seconds between retries
-            retryExceptions:
-            - java.lang.IllegalStateException  #Retry only for allowed Exceptions
-            ignoreExceptions:
-            - java.lang.NullPointerException  #Don't retry for this Exceptions
+            instances:
+                userServiceRetry:
+                    maxAttempts: 3  #maximum 3 times (1 original + 2 retries)
+                    waitDuration: 2s  #Wait 2 seconds between retries
+                    retryExceptions:
+                    - java.lang.IllegalStateException  #Retry only for allowed Exceptions
+                    ignoreExceptions:
+                    - java.lang.NullPointerException  #Don't retry for this Exceptions
 
 
 RATE LIMITER USING resilience4j
@@ -270,7 +376,7 @@ scalabilty, reliability
 - Max 5 calls
 - Per 1 minute
 - No waiting (fail fast)
-- Configuration:
+- yml configuration for retry mechanism:
     resilience4j:
         rateLimiter:
             instances:
@@ -278,21 +384,36 @@ scalabilty, reliability
                 limitForPeriod: 5  # Max 5 calls per period
                 limitRefreshPeriod: 1m  # in every 1 minute
                 timeoutDuration: 0  # No waiting, fail immediately if limit exceeded - (fail fast)
-- Balanced configuration:
+- desired Balanced configuration: 
     limitForPeriod: 10
     limitRefreshPeriod: 1s
     timeoutDuration: 2s
 
 
 OKTA FOR AUTHENTICATION AND AUTHORIZATION WITH SPRING SECURITY 
+- How it works:
+    - request made by client to api-gateway -> authenticate user with spring security
+    and okta auth -> api-gateway sends response+token (generated by okta) -> any new requests
+    made by client to apigateway had token in header -> any service/api-gateway verifies, header
+    -> verified - allowed access -> else denied.
+- Okta Configuiration:
+    Create Okta account (free) -> create application - allow client credentials, maintain correct redirect URIs, cleint secrets and 
+    ID is important -> create new users and groups -> assign users to groups and application 
+    -> create new scope and claim (claim is part of tokem when created, scope is part of authorization 
+    - we created internal scope - for valid internal communication between services)
 - Okta to be implemented in api-gateway, as first client requests reaches gateway, then 
 targeted services
-- Add 2 necessary dependancies, okta and spring security
-- Create Configuration file, to create Bean of SecurityWebFilterChain 
+- Add 2 necessary dependancies, of okta and spring security
+- Use @
+- Create Configuration file with annotation - @EnableWebFluxSecurity, to create Bean of SecurityWebFilterChain, 
+create controller & model for serving request & to give response (with token)
+- @EnableWebFluxSecurity - is required because in api-gateway we use webflux dependancy, and to implement
+security we need this annotation at configuration file
+- 
 - So your Gateway is doing TWO roles:
     1. OAuth2 Client → handles login (Okta) (authentication)
     2. Resource Server → validates JWT
-@Bean
+    @Bean
     public SecurityWebFilterChain getSecurityWebFilterChain(ServerHttpSecurity http) 
     {
         return http

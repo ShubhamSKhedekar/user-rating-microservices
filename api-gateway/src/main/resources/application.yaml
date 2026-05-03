@@ -4,6 +4,8 @@ spring:
 
   cloud:
     gateway:
+      default-filters:
+        - TokenRelay
       routes:
         - id: USER-SERVICE
           uri: lb://USER-SERVICE

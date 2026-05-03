@@ -12,7 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @RequestMapping("/staff")
 public class StaffController {
 
-    @PreAuthorize("hasAuthority('Admin') || hasAuthority('SCOPE_internal')")
+    // @PreAuthorize("hasAuthority('Admin') || hasAuthority('SCOPE_internal')")
+    @PreAuthorize("hasAuthority('Admin')")
     @RequestMapping(method = RequestMethod.GET, path = "/get")
     public ResponseEntity<List<String>> getStaff() {
         return ResponseEntity.ok
