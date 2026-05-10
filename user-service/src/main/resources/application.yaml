@@ -21,11 +21,12 @@ spring:
     import: "optional:configserver:https://verbose-space-meme-4447pjpxqjxcpxp-8085.app.github.dev/"  
 
   # For Okta integration, to ensure that the original client IP and other headers are forwarded correctly
+  # Okta configuration - for client - credentials flow (if this service needs to call other services with its own identity) 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://integrator-9095306.okta.com/oauth2/default
+          issuer-uri: https://integrator-9095306.okta.com/oauth2/default #Spring Security will use this to validate incoming JWT tokens
       client:
         registration:
           my-internal-client:
@@ -117,10 +118,10 @@ resilience4j:
 # Request 6 → ❌ rejected immediately
 # 👉 Because limit reached
 
-# Okta Configuration
+# Okta Configuration - for resource server (validating incoming tokens)
 okta:
   oauth2:
-    issuer: https://integrator-9095306.okta.com/oauth2/default
+    issuer: https://integrator-9095306.okta.com/oauth2/default  #Okta will use this to validate incoming JWT tokens
     audience: api://default
     # client-id: 0oa122zy592GntPMu698
     # client-secret: p6z2ZO1AR-OdZO-IMqG1WGhLzwwNdVTBJS-IU_xRM1Z1weJGdkRvpMywexTpxG_7

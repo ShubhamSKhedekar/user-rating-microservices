@@ -21,9 +21,9 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 // @EnableWebFluxSecurity
 public class AuthController {
 
-        private Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+    private Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
-            @GetMapping("/login")
+    @GetMapping("/login")
     public ResponseEntity<AuthResponse> login(
         @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient,
         @AuthenticationPrincipal OidcUser oidcUser,

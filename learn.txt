@@ -403,16 +403,15 @@ OKTA FOR AUTHENTICATION AND AUTHORIZATION WITH SPRING SECURITY
     - we created internal scope - for valid internal communication between services)
 - Okta to be implemented in api-gateway, as first client requests reaches gateway, then 
 targeted services
+- So your Gateway is doing TWO roles:
+    1. OAuth2 Client → handles login (Okta) (authentication)
+    2. Resource Server → validates JWT & routes request to service
 - Add 2 necessary dependancies, of okta and spring security
-- Use @
 - Create Configuration file with annotation - @EnableWebFluxSecurity, to create Bean of SecurityWebFilterChain, 
 create controller & model for serving request & to give response (with token)
 - @EnableWebFluxSecurity - is required because in api-gateway we use webflux dependancy, and to implement
 security we need this annotation at configuration file
-- 
-- So your Gateway is doing TWO roles:
-    1. OAuth2 Client → handles login (Okta) (authentication)
-    2. Resource Server → validates JWT
+- Configuiration file for API-GATEWAY:
     @Bean
     public SecurityWebFilterChain getSecurityWebFilterChain(ServerHttpSecurity http) 
     {
@@ -439,4 +438,261 @@ security we need this annotation at configuration file
                 .build();
                 // Build and return the security filter chain
     }
-- Make controller method, when 
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+
+        jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+            // ✅ Add scopes
+            JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();
+            authorities.addAll(scopeConverter.convert(jwt));
+
+            // ✅ Add custom claim (myclaim)
+            List<String> roles = jwt.getClaimAsStringList("myclaim");
+            if (roles != null) {
+                roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
+            }
+            return authorities;
+        });
+
+        return jwtConverter;
+    }
+- SecurityWebFilterChain bean is used to tell spring security - which requests
+to be authenticated, by which user role, at which URL request should be redirected
+for authentication, validation of JWT token and etc.
+    - In SecurityWebFilterChain, we use 
+            .oauth2Client()
+            .and()
+            .oauth2ResourceServer()
+- Flow with .oauth2Client()
+    User hits Gateway
+        ↓
+    Gateway redirects to Okta login
+        ↓
+    User authenticates
+        ↓
+    Gateway receives authorization code
+        ↓
+    Gateway exchanges code for JWT token
+        ↓
+    Gateway stores token
+        ↓
+    TokenRelay forwards token to microservices
+
+    - Without .oauth2Client():
+        ❌ Gateway cannot participate in OAuth2 login flow
+        ❌ TokenRelay filter will not work
+        ❌ No access token available to forward
+- Flow with .oauth2ResourceServer()
+    Request with JWT
+        ↓
+    Gateway validates JWT
+        ↓
+    Extracts scopes & claims
+        ↓
+    Creates Authentication object
+        ↓
+    Security context populated
+
+    -Without .oauth2ResourceServer():
+        ❌ Validate JWT tokens
+        ❌ Decode JWT
+        ❌ Extract scopes/claims
+        ❌ Authorize requests
+        ❌ @PreAuthorize won’t work
+
+- Bean JwtAuthenticationConverter - is used to fetch claims (includes user 
+groups created in okta and etc) & add them in JWT token's authorities list,
+which is used @PreAuthorize for validations. 
+- Make controller method, because of below flow:
+    1. User Requests API Gateway URL
+    Example:
+    https://your-domain/auth/login
+    Request first reaches the API Gateway, controller method.
+
+    2. API Gateway Detects User is Not Authenticated
+    Because of: .oauth2Login()
+    Spring Security automatically starts the OAuth2 login flow.
+
+    Gateway redirects user to Okta authorization endpoint:
+    https://integrator-9095306.okta.com/oauth2/default/v1/authorize
+
+    3. User Logs in on Okta
+    User enters:
+        username
+        password
+    Okta authenticates the user.
+
+    4. Okta Sends Authorization Code to API Gateway
+    After successful login, Okta redirects back to:
+    /login/oauth2/code/okta
+
+    Configured using:
+    redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+    Example redirect:
+    https://your-gateway/login/oauth2/code/okta?code=abc123
+
+    Important:
+    Okta sends ONLY authorization code here, NOT JWT token yet.
+
+    5. API Gateway Exchanges Authorization Code for Tokens
+    This is where: .oauth2Client()
+
+    helps.
+    Spring Security internally calls Okta token endpoint:
+    /oauth2/default/v1/token
+
+    and sends:
+        authorization code
+        client-id
+        client-secret
+
+    Okta then returns:
+        {
+        "access_token": "eyJhbGciOiJSUzI1Ni...",
+        "refresh_token": "...",
+        "id_token": "...",
+        "expires_in": 3600
+        }
+    So:
+    Okta generates JWT token, API Gateway receives it
+
+    6. Spring Security Stores Authenticated User
+    Spring creates:
+        OAuth2AuthorizedClient
+        OidcUser
+        SecurityContext
+
+    That is why these annotations work:
+    @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
+    @AuthenticationPrincipal OidcUser oidcUser
+
+    7. Controller Returns JWT Token
+    Example:
+    authResponse.setAccessToken(
+        authorizedClient.getAccessToken().getTokenValue()
+    );
+    Gateway extracts JWT from Spring Security context and returns it.
+
+- If you want application to OKTA CLIENT:
+    - call other services - adding JWT token in request, it should be register 
+    as client, with help of adding related dependancies & configurations
+- Similar with OKTA SERVER, if you want: (like hotel-service, rating-service)
+    - validate JWT  token and allow request to access its APIs (using @PreAuthorize)
+    it should be register as server, with help of adding related dependancies & configurations
+-Else add both (as in case of user-service, api-gateway)
+
+
+SECURITY ARCHITECTURE OF APPLICATION 
+- Architecture Summary
+Service	                       Role
+API Gateway	           OAuth2 Client + Resource Server
+User-Service	       Resource Server (+ maybe OAuth2 Client)
+Hotel-Service	       Resource Server
+Rating-Service	       Resource Server
+
+-There are TWO separate concepts:
+Concept                      Meaning
+OAuth2 Client	       App requesting/acquiring tokens
+Resource Server	       App validating tokens
+
+- Using dependancy - okta-spring-boot-starter already internally brings OAuth2 Resource Server support.
+- That is why your microservices are able to validate JWTs even without explicitly adding:
+spring-boot-starter-oauth2-resource-server
+
+- TokenRelay ONLY works in Gateway
+works only for: Client → Gateway → Microservice
+NOT for: Microservice → Microservice
+- Currently
+    Client
+    ↓ JWT
+    Gateway
+    ↓ JWT (TokenRelay)
+    User-Service
+    ↓ NO JWT
+    Hotel-Service ❌
+- Correct Flow
+    Client
+    ↓ JWT
+    Gateway
+    ↓ JWT
+    User-Service
+    ↓ JWT manually forwarded - using interceptors
+    Hotel-Service ✅
+
+
+FEIGN CLIENT INTERCEPTOR
+- Its used, to intercept request made by interceptor & add JWT token in request
+header
+- Create a class for same, and should implement interface RequestInterceptor and implement 
+method apply()
+    @Autowired
+    private OAuth2AuthorizedClientManager manager;
+
+    @Override
+    public void apply(RequestTemplate requestTemplate) {
+        logger.info("UserService: Intercepting Feign client request to: " + requestTemplate.url());
+        String token = manager.authorize(OAuth2AuthorizeRequest
+                                        .withClientRegistrationId("my-internal-client")
+                                        .principal("internal").build())
+                                        .getAccessToken()
+                                        .getTokenValue();
+        requestTemplate.header("Authorization", "Bearer " + token);
+    }
+
+
+REST TEMPLATE INTERCEPTOR
+- Its used, to intercept request made by interceptor & add JWT token in request
+header
+- Create a class for same, and should implement interface ClientHttpRequestInterceptor and implement 
+method intercept()
+    @Autowired
+    private OAuth2AuthorizedClientManager manager;
+
+    @Override
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+        // Add your custom logic here (e.g., add headers, log requests, etc.)
+        logger.info("UserService: Intercepting restTemplate request to: " + request.getURI());
+        String token = manager.authorize(OAuth2AuthorizeRequest
+                                        .withClientRegistrationId("my-internal-client")
+                                        .principal("internal").build())
+                                        .getAccessToken()
+                                        .getTokenValue();
+        request.getHeaders().add("Authorization", "Bearer " + token);
+        return execution.execute(request, body);
+    }
+
+
+SPRING WEBFLUX
+- Spring Cloud Gateway is built on Spring WebFlux, which uses a reactive non-blocking programming 
+model. Therefore it requires SecurityWebFilterChain and ServerHttpSecurity & netty server 
+- microservices are traditional Spring MVC applications using servlet-based architecture with 
+Tomcat, so they use SecurityFilterChain and HttpSecurity.
+
+- Spring Cloud Gateway was designed for:
+    - high concurrency
+    - non-blocking routing
+    - efficient IO handling
+    - API proxying
+    - streaming
+- A gateway handles thousands of simultaneous lightweight requests.
+- my Sevices microservices are doing:
+    - database operations
+    - business logic
+    - JPA/Hibernate
+    - MySQL/PostgreSQL queries
+- These are mostly blocking operations anyway. So standard Spring MVC is preferred.
+
+- Main Difference
+Feature	              Spring MVC	       Spring WebFlux
+Server Type	           Servlet	            Reactive
+Runtime	               Tomcat	            Netty
+Request Model	       Blocking	            Non-blocking
+Security Bean	       SecurityFilterChain	SecurityWebFilterChain
+Security Annotation	   @EnableWebSecurity	@EnableWebFluxSecurity

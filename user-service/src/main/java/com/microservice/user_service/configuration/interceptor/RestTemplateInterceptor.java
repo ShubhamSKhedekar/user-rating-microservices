@@ -16,7 +16,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepo
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.context.annotation.Bean;
 
-
+@Component
 public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
     private OAuth2AuthorizedClientManager manager;
@@ -30,7 +30,11 @@ public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
         // Add your custom logic here (e.g., add headers, log requests, etc.)
         logger.info("UserService: Intercepting restTemplate request to: " + request.getURI());
-        String token = manager.authorize(OAuth2AuthorizeRequest.withClientRegistrationId("my-internal-client").principal("internal").build()).getAccessToken().getTokenValue();
+        String token = manager.authorize(OAuth2AuthorizeRequest
+                                        .withClientRegistrationId("my-internal-client")
+                                        .principal("internal").build())
+                                        .getAccessToken()
+                                        .getTokenValue();
         request.getHeaders().add("Authorization", "Bearer " + token);
         return execution.execute(request, body);
     }

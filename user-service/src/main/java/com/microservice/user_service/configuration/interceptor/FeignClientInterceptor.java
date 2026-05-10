@@ -20,7 +20,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 
-@Configuration
+@Configuration  //use only if a bean is declared in this class, otherwise use @Component
 @Component
 public class FeignClientInterceptor implements RequestInterceptor {
     private Logger logger = LoggerFactory.getLogger(FeignClientInterceptor.class);
@@ -31,7 +31,11 @@ public class FeignClientInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate requestTemplate) {
         logger.info("UserService: Intercepting Feign client request to: " + requestTemplate.url());
-        String token = manager.authorize(OAuth2AuthorizeRequest.withClientRegistrationId("my-internal-client").principal("internal").build()).getAccessToken().getTokenValue();
+        String token = manager.authorize(OAuth2AuthorizeRequest
+                                        .withClientRegistrationId("my-internal-client")
+                                        .principal("internal").build())
+                                        .getAccessToken()
+                                        .getTokenValue();
         requestTemplate.header("Authorization", "Bearer " + token);
     }
 
