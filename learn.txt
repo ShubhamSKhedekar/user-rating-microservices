@@ -346,6 +346,25 @@ Next request:
 → No retry
 → Direct fallback
 
+- Visual Flow
+	Main Method
+	   ↓
+	Failure
+	   ↓
+	Retry 1
+	   ↓
+	Failure
+	   ↓
+	Retry 2
+	   ↓
+	Failure
+	   ↓
+	Retry 3
+	   ↓
+	Failure
+	   ↓
+	Fallback Method
+
 - Use @Retry in controller method, which you are targeting
     @Retry(name = "userServiceRetry", fallbackMethod = "fetchUserByIdFallback")
 - Maintain different fallback method of circuitbreaker and retry mechanism
