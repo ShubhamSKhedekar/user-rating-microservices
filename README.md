@@ -17,7 +17,6 @@ User Rating Microservices is a backend-based distributed application developed u
 - Config Server
 - Resilience4j
 - Feign Client
-- Docker
 - Maven
 
 ## ✨ Features
